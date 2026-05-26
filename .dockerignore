@@ -1,0 +1,30 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Jupyter notebooks
+*.ipynb
+.ipynb_checkpoints/
+
+# Git
+.git/
+.gitignore
+
+# Dev/doc files
+Documents/
+input/
+*.pptx
+*.pdf
+README.md
+
+# Already-uploaded images (optional, these regenerate at runtime)
+static/uploads/*
+uploads/*
+
+# Virtual environment if you have one
+venv/
+env/
+.env/
