@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Scan | Retinex</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f4f6f9; min-height: 100vh;
+        }
+
+        .navbar {
+            background: #0b5e3a; padding: 16px 32px;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        .navbar-brand { color: white; font-size: 1.5rem; font-weight: 700; }
+        .navbar-nav { display: flex; gap: 24px; align-items: center; }
+        .navbar-nav a { color: rgba(255,255,255,0.85); text-decoration: none; font-size: 0.95rem; font-weight: 500; }
+        .navbar-nav a:hover, .navbar-nav a.active { color: white; }
+        .btn-logout {
+            background: rgba(255,255,255,0.15); color: white;
+            padding: 7px 16px; border-radius: 8px; text-decoration: none;
+        }
+        .btn-logout:hover { background: rgba(255,255,255,0.25); }
+
+        .main { padding: 40px 32px; max-width: 680px; margin: 0 auto; }
+
+        .page-title { font-size: 1.4rem; font-weight: 700; color: #333; margin-bottom: 24px; }
+
+        .upload-card {
+            background: white; border-radius: 16px;
+            padding: 40px; box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+
+        .drop-zone {
+            border: 2.5px dashed #c8e6c9;
+            border-radius: 12px; padding: 48px 20px;
+            text-align: center; cursor: pointer;
+            transition: all 0.2s; margin-bottom: 24px;
+            background: #f9fffe;
+        }
+        .drop-zone:hover, .drop-zone.dragover {
+            border-color: #0b5e3a; background: #f0f8f5;
+        }
+        .drop-zone .icon { font-size: 3rem; margin-bottom: 12px; }
+        .drop-zone p { color: #555; font-size: 1rem; }
+        .drop-zone span { color: #0b5e3a; font-weight: 600; cursor: pointer; }
+        .drop-zone .hint { font-size: 0.82rem; color: #999; margin-top: 8px; }
+
+        #file-input { display: none; }
+
+        #preview-container { text-align: center; margin-bottom: 20px; display: none; }
+        #preview-container img {
+            max-width: 100%; max-height: 260px;
+            border-radius: 10px; border: 2px solid #e0e0e0;
+        }
+        #file-name { font-size: 0.85rem; color: #666; margin-top: 8px; }
+
+        .btn-primary {
+            width: 100%; padding: 13px;
+            background: #0b5e3a; color: white;
+            border: none; border-radius: 10px;
+            font-size: 1rem; font-weight: 600;
+            cursor: pointer; transition: background 0.2s;
+        }
+        .btn-primary:hover { background: #094d30; }
+        .btn-primary:disabled { background: #aaa; cursor: not-allowed; }
+
+        .alert { padding: 10px 14px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9rem; }
+        .alert-warning { background: #fff8e1; color: #f57f17; border-left: 4px solid #f57f17; }
+        .alert-success { background: #e8f5e9; color: #2e7d32; border-left: 4px solid #2e7d32; }
+        .alert-danger  { background: #ffebee; color: #c62828; border-left: 4px solid #c62828; }
+
+        .loading { display: none; text-align: center; padding: 16px; color: #0b5e3a; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="navbar-brand">Retinex</div>
+        <div class="navbar-nav">
+            <a href="{{ url_for('patient.dashboard') }}">Dashboard</a>
+            <a href="{{ url_for('patient.upload') }}" class="active">New Scan</a>
+            <a href="{{ url_for('patient.results') }}">My Results</a>
+            <a href="{{ url_for('auth.logout') }}" class="btn-logout">Logout</a>
+        </div>
+    </nav>
+
+    <div class="main">
+        <div class="page-title">Upload Retinal Scan</div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="upload-card">
+            <form method="POST" enctype="multipart/form-data" id="upload-form"
+                  action="{{ url_for('patient.upload') }}">
+
+                <div class="drop-zone" id="drop-zone"
+                     onclick="document.getElementById('file-input').click()">
+                    <div class="icon">🔬</div>
+                    <p>Drag & drop your retinal image here</p>
+                    <p>or <span>browse to upload</span></p>
+                    <p class="hint">Supported formats: PNG, JPG, JPEG</p>
+                </div>
+
+                <input type="file" id="file-input" name="file"
+                       accept=".png,.jpg,.jpeg" onchange="previewImage(event)">
+
+                <div id="preview-container">
+                    <img id="preview-img" src="" alt="Preview">
+                    <div id="file-name"></div>
+                </div>
+
+                <div class="loading" id="loading">
+                    Analysing scan, please wait...
+                </div>
+
+                <button type="submit" class="btn-primary" id="submit-btn" disabled>
+    Analyse Scan
+</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function previewImage(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('preview-img').src = e.target.result;
+            document.getElementById('file-name').textContent = file.name;
+            document.getElementById('preview-container').style.display = 'block';
+            document.getElementById('drop-zone').style.display = 'none';
+            document.getElementById('submit-btn').disabled = false;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    document.getElementById('upload-form').addEventListener('submit', function() {
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('submit-btn').disabled = true;
+        document.getElementById('submit-btn').textContent = 'Analysing...';
+    });
+
+    const dropZone = document.getElementById('drop-zone');
+    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+        const file = e.dataTransfer.files[0];
+        if (file) {
+            const input = document.getElementById('file-input');
+            const dt = new DataTransfer();
+            dt.items.add(file);
+            input.files = dt.files;
+            previewImage({ target: input });
+        }
+    });
+    </script>
+</body>
+</html>

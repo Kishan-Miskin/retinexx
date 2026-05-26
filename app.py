@@ -13,8 +13,20 @@ from reportlab.lib import colors
 from reportlab.platypus import PageBreak
 from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY
 
+# ── NEW: Added imports ──────────────────────────────────────
+from config import Config
+from models import db, User, Patient, Doctor, Scan
+from flask_login import LoginManager
+from flask_bcrypt import Bcrypt
+from flask_login import LoginManager, current_user
+# ────────────────────────────────────────────────────────────
+
 
 app = Flask(__name__)
+
+# ── NEW: Load config ────────────────────────────────────────
+app.config.from_object(Config)
+# ────────────────────────────────────────────────────────────
 
 # SAVE INTO STATIC FOLDER SO BROWSER CAN LOAD IMAGES
 UPLOAD_FOLDER = 'static/uploads'
@@ -25,13 +37,38 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+# ── NEW: Initialize extensions ──────────────────────────────
+db.init_app(app)
+bcrypt = Bcrypt(app)
+
+login_manager = LoginManager(app)
+login_manager.login_view = 'auth.login'
+login_manager.login_message = 'Please log in to access this page.'
+login_manager.login_message_category = 'warning'
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+# ────────────────────────────────────────────────────────────
+
+# ── NEW: Register blueprints ────────────────────────────────
+from auth import auth_bp
+from patient import patient_bp
+from doctor import doctor_bp
+
+app.register_blueprint(auth_bp,    url_prefix='/auth')
+app.register_blueprint(patient_bp, url_prefix='/patient')
+app.register_blueprint(doctor_bp,  url_prefix='/doctor')
+# ────────────────────────────────────────────────────────────
+
+# ── NEW: Create DB tables on startup ────────────────────────
+with app.app_context():
+    db.create_all()
+# ────────────────────────────────────────────────────────────
+
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-
-
-
 
 
 def predict_class(path):
@@ -64,11 +101,8 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_JUSTIFY
 from datetime import datetime
 
-def generate_pdf_report(image_path, diagnosis, probabilities):
-    """
-    Generates a professional medical report PDF with enhanced formatting.
-    """
-    file_name = "Medical_Analysis_Report.pdf"
+def generate_pdf_report(image_path, diagnosis, probabilities, output_path=None):
+    file_name = output_path or "Medical_Analysis_Report.pdf"
     doc = SimpleDocTemplate(
         file_name,
         pagesize=A4,
@@ -204,12 +238,10 @@ def generate_pdf_report(image_path, diagnosis, probabilities):
     ))
     story.append(Spacer(1, 20))
 
-    # Diagnosis
     story.append(Paragraph("SCREENING RESULT", section_heading_style))
     story.append(Paragraph(diagnosis, diagnosis_style))
     story.append(Spacer(1, 20))
 
-    # Probabilities
     story.append(Paragraph("PREDICTION CONFIDENCE LEVELS", section_heading_style))
 
     p_pos = round(probabilities[0] * 100, 2)
@@ -233,12 +265,7 @@ def generate_pdf_report(image_path, diagnosis, probabilities):
     # ==================== PAGE 2 ====================
     story.append(PageBreak())
 
-    # -----------------------------------------
-    # IMPROVED CONDITION FOR SHOWING LIFESTYLE + DIET
-    # Check if diabetic retinopathy is detected (positive case)
-    # -----------------------------------------
     diagnosis_lower = diagnosis.lower().strip()
-    # Show recommendations only if DR is detected (when it's NOT "no diabetic retinopathy")
     show_recommendations = "no diabetic retinopathy" not in diagnosis_lower
 
     # ==================== LIFESTYLE (ONLY IF POSITIVE) ====================
@@ -364,9 +391,6 @@ def generate_pdf_report(image_path, diagnosis, probabilities):
     return file_name
 
 
-
-
-
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -374,6 +398,12 @@ def index():
 
 @app.route('/predict', methods=['POST'])
 def upload_file():
+    # Redirect unauthenticated users to register
+    if not current_user.is_authenticated:
+        from flask import flash
+        flash('Please register or login to analyse a retinal scan.', 'warning')
+        return redirect(url_for('auth.register'))
+
     if 'file' not in request.files:
         return render_template('index.html', message='No file part')
 
@@ -383,20 +413,15 @@ def upload_file():
 
     if file and allowed_file(file.filename):
         filename = file.filename
-        # Save inside static/uploads so browser + PDF can access it
         save_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         file.save(save_path)
-
         diagnosis, probabilities = predict_class(save_path)
-
-        # TIMESTAMP to show on web page (optional)
         timestamp = datetime.now().strftime("%d-%m-%Y %H:%M")
-
         return render_template(
             'predict.html',
             diagnosis=diagnosis,
             probabilities=probabilities,
-            user_image=filename,   # pass only filename so template uses url_for('static', ...)
+            user_image=filename,
             timestamp=timestamp
         )
 
@@ -411,12 +436,10 @@ def download_report():
 
     probabilities = list(map(float, probs))
 
-    # Correct static path for uploaded image
     image_path = os.path.join("static", "uploads", image_filename)
 
     pdf_file = generate_pdf_report(image_path, diagnosis, probabilities)
     return send_file(pdf_file, as_attachment=True)
-
 
 
 if __name__ == '__main__':

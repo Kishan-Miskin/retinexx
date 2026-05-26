@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./static/uploads:/app/static/uploads
+    environment:
+      - SECRET_KEY=retinex-secret-key-2024
+      - DATABASE_URL=mysql+pymysql://druser:drpassword123@db:3306/dr_detection
+      - MYSQL_DATABASE=dr_detection
+      - MYSQL_USER=druser
+      - MYSQL_PASSWORD=drpassword123
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: always
+
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword123
+      MYSQL_DATABASE: dr_detection
+      MYSQL_USER: druser
+      MYSQL_PASSWORD: drpassword123
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  db_data:

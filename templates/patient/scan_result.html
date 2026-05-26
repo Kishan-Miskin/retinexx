@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scan Result | Retinex</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f6f9; min-height: 100vh; }
+
+        .navbar {
+            background: #0b5e3a; padding: 16px 32px;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        .navbar-brand { color: white; font-size: 1.5rem; font-weight: 700; }
+        .navbar-nav { display: flex; gap: 24px; align-items: center; }
+        .navbar-nav a { color: rgba(255,255,255,0.85); text-decoration: none; font-size: 0.95rem; font-weight: 500; }
+        .navbar-nav a:hover { color: white; }
+        .btn-logout { background: rgba(255,255,255,0.15); color: white; padding: 7px 16px; border-radius: 8px; text-decoration: none; }
+
+        .main { padding: 40px 32px; max-width: 860px; margin: 0 auto; }
+        .page-title { font-size: 1.4rem; font-weight: 700; color: #333; margin-bottom: 24px; }
+
+        .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+
+        .card { background: white; border-radius: 16px; padding: 28px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+
+        .scan-img { width: 100%; border-radius: 10px; border: 2px solid #e0e0e0; }
+
+        .result-banner {
+            border-radius: 12px; padding: 20px;
+            text-align: center; margin-bottom: 20px;
+        }
+        .result-banner.detected { background: #ffebee; border: 2px solid #ef9a9a; }
+        .result-banner.clear    { background: #e8f5e9; border: 2px solid #a5d6a7; }
+        .result-banner h2 { font-size: 1.1rem; font-weight: 700; }
+        .result-banner.detected h2 { color: #c62828; }
+        .result-banner.clear    h2 { color: #2e7d32; }
+        .result-banner p { font-size: 0.85rem; opacity: 0.75; margin-top: 4px; }
+
+        .prob-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+        .prob-label { font-size: 0.88rem; color: #555; }
+        .prob-val { font-size: 0.88rem; font-weight: 700; color: #333; }
+        .prob-track { background: #f0f0f0; border-radius: 20px; height: 8px; overflow: hidden; margin-top: 6px; }
+        .prob-fill  { height: 100%; border-radius: 20px; background: linear-gradient(90deg, #0b5e3a, #1a8a5a); }
+
+        .card h3 { font-size: 0.9rem; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 18px; }
+
+        .actions { display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
+        .btn { padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; text-decoration: none; text-align: center; cursor: pointer; border: none; display: inline-block; }
+        .btn-primary { background: #0b5e3a; color: white; }
+        .btn-primary:hover { background: #094d30; }
+        .btn-outline { background: white; color: #0b5e3a; border: 2px solid #0b5e3a; }
+        .btn-outline:hover { background: #f0f8f5; }
+        .btn-download { background: #1565c0; color: white; }
+        .btn-download:hover { background: #0d47a1; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="navbar-brand">Retinex</div>
+        <div class="navbar-nav">
+            <a href="{{ url_for('patient.dashboard') }}">Dashboard</a>
+            <a href="{{ url_for('patient.upload') }}">New Scan</a>
+            <a href="{{ url_for('patient.results') }}">My Results</a>
+            <a href="{{ url_for('auth.logout') }}" class="btn-logout">Logout</a>
+        </div>
+    </nav>
+
+    <div class="main">
+        <div class="page-title">Analysis Complete</div>
+
+        <div class="result-grid">
+
+            <div class="card">
+                <h3>Retinal Scan</h3>
+                <img class="scan-img"
+                     src="{{ url_for('static', filename='uploads/' + user_image) }}"
+                     alt="Retinal scan">
+            </div>
+
+            <div class="card">
+                <h3>Diagnosis Result</h3>
+
+                <div class="result-banner {% if 'No' in diagnosis %}clear{% else %}detected{% endif %}">
+                    <h2>{{ diagnosis }}</h2>
+                    <p>AI-assisted screening result</p>
+                </div>
+
+                <h3>Confidence Breakdown</h3>
+
+                <div>
+                    <div class="prob-row">
+                        <span class="prob-label">DR Detected</span>
+                        <span class="prob-val">{{ "%.1f"|format(probabilities[0] * 100) }}%</span>
+                    </div>
+                    <div class="prob-track">
+                        <div class="prob-fill" style="width: {{ probabilities[0] * 100 }}%"></div>
+                    </div>
+                </div>
+
+                <br>
+
+                <div>
+                    <div class="prob-row">
+                        <span class="prob-label">No DR Detected</span>
+                        <span class="prob-val">{{ "%.1f"|format(probabilities[1] * 100) }}%</span>
+                    </div>
+                    <div class="prob-track">
+                        <div class="prob-fill" style="width: {{ probabilities[1] * 100 }}%"></div>
+                    </div>
+                </div>
+
+                <div class="actions">
+                    <a href="{{ url_for('patient.upload') }}" class="btn btn-primary">New Scan</a>
+                    <a href="{{ url_for('patient.results') }}" class="btn btn-outline">View History</a>
+
+                    <!-- Download PDF Report -->
+                    <form method="POST" action="/download_report" style="margin:0;">
+                        <input type="hidden" name="image_path" value="{{ user_image }}">
+                        <input type="hidden" name="diagnosis" value="{{ diagnosis }}">
+                        <input type="hidden" name="probabilities" value="{{ probabilities[0] }}">
+                        <input type="hidden" name="probabilities" value="{{ probabilities[1] }}">
+                        <button type="submit" class="btn btn-download">⬇ Download Report</button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</body>
+</html>

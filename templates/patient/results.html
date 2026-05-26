@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Results | Retinex</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f4f6f9; min-height: 100vh;
+        }
+
+        .navbar {
+            background: #0b5e3a; padding: 16px 32px;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        .navbar-brand { color: white; font-size: 1.5rem; font-weight: 700; }
+        .navbar-nav { display: flex; gap: 24px; align-items: center; }
+        .navbar-nav a { color: rgba(255,255,255,0.85); text-decoration: none; font-size: 0.95rem; font-weight: 500; }
+        .navbar-nav a:hover, .navbar-nav a.active { color: white; }
+        .btn-logout {
+            background: rgba(255,255,255,0.15); color: white;
+            padding: 7px 16px; border-radius: 8px; text-decoration: none;
+        }
+
+        .main { padding: 32px; max-width: 1100px; margin: 0 auto; }
+
+        .page-header {
+            display: flex; justify-content: space-between;
+            align-items: center; margin-bottom: 24px;
+        }
+        .page-title { font-size: 1.4rem; font-weight: 700; color: #333; }
+        .btn-new-scan {
+            background: #0b5e3a; color: white;
+            padding: 10px 20px; border-radius: 8px;
+            text-decoration: none; font-weight: 600; font-size: 0.9rem;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .result-card {
+            background: white; border-radius: 14px;
+            overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            transition: transform 0.2s;
+        }
+        .result-card:hover { transform: translateY(-3px); }
+
+        .result-card img {
+            width: 100%; height: 180px; object-fit: cover;
+        }
+
+        .result-body { padding: 18px; }
+
+        .result-date { font-size: 0.8rem; color: #999; margin-bottom: 10px; }
+
+        .badge {
+            display: inline-block; padding: 5px 14px;
+            border-radius: 20px; font-size: 0.82rem; font-weight: 600;
+            margin-bottom: 10px;
+        }
+        .badge-danger  { background: #ffebee; color: #c62828; }
+        .badge-success { background: #e8f5e9; color: #2e7d32; }
+
+        .confidence-bar-wrap {
+            background: #f0f0f0; border-radius: 20px;
+            height: 8px; overflow: hidden; margin-top: 8px;
+        }
+        .confidence-bar {
+            height: 100%; border-radius: 20px;
+            background: linear-gradient(90deg, #0b5e3a, #1a8a5a);
+        }
+        .confidence-label {
+            font-size: 0.8rem; color: #666;
+            margin-top: 6px;
+        }
+
+        .empty-state {
+            text-align: center; padding: 64px 20px; color: #999;
+            grid-column: 1/-1;
+        }
+        .empty-state p { margin-bottom: 16px; font-size: 1rem; }
+        .empty-state a {
+            background: #0b5e3a; color: white;
+            padding: 10px 24px; border-radius: 8px;
+            text-decoration: none; font-weight: 600;
+        }
+
+        .alert { padding: 10px 14px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9rem; }
+        .alert-success { background: #e8f5e9; color: #2e7d32; border-left: 4px solid #2e7d32; }
+        .alert-danger  { background: #ffebee; color: #c62828; border-left: 4px solid #c62828; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="navbar-brand">Retinex</div>
+        <div class="navbar-nav">
+            <a href="{{ url_for('patient.dashboard') }}">Dashboard</a>
+            <a href="{{ url_for('patient.upload') }}">New Scan</a>
+            <a href="{{ url_for('patient.results') }}" class="active">My Results</a>
+            <a href="{{ url_for('auth.logout') }}" class="btn-logout">Logout</a>
+        </div>
+    </nav>
+
+    <div class="main">
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="page-header">
+            <div class="page-title">My Scan Results</div>
+            <a href="{{ url_for('patient.upload') }}" class="btn-new-scan">+ New Scan</a>
+        </div>
+
+        <div class="results-grid">
+            {% if scans %}
+                {% for scan in scans %}
+                <div class="result-card">
+                    <img src="{{ url_for('static', filename='uploads/' + scan.image_path) }}"
+                         alt="Retinal scan" onerror="this.src='{{ url_for('static', filename='images/placeholder.png') }}'; ">
+                    <div class="result-body">
+                        <div class="result-date">{{ scan.created_at.strftime('%d %B %Y at %H:%M') }}</div>
+                        {% if 'No' in scan.prediction %}
+                            <span class="badge badge-success">No DR Detected</span>
+                        {% else %}
+                            <span class="badge badge-danger">DR Detected</span>
+                        {% endif %}
+                        <div class="confidence-bar-wrap">
+                            <div class="confidence-bar" style="width: {{ scan.confidence }}%"></div>
+                        </div>
+                        <div class="confidence-label">Confidence: {{ "%.1f"|format(scan.confidence) }}%</div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <p>No scan results yet. Upload your first retinal image.</p>
+                    <a href="{{ url_for('patient.upload') }}">Upload Now</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

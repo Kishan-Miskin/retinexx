@@ -5,3 +5,4 @@ train
 val
 input
 model.h5
+.env

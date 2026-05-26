@@ -503,6 +503,7 @@
 
           <!-- Upload Form -->
           <form 
+          id="predict-form"
             action="/predict" 
             method="post" 
             enctype="multipart/form-data"
@@ -604,6 +605,8 @@
               </div>
             </div>
 
+                        <!-- Hidden auth check -->
+            <input type="hidden" id="is-authenticated" value="{{ '1' if current_user.is_authenticated else '0' }}">
             <!-- Submit Button -->
             <button 
               type="submit"
@@ -723,19 +726,24 @@
   <!-- Template Main JS File -->
   <script src="static/assets/js/main.js"></script>
 
-</body>
 <script>
   function displayFileName(input) {
-  const fileName = input.files[0]?.name;
-  const fileNameDiv = document.getElementById('fileName');
-  const uploadBox = document.getElementById('uploadBox');
-  
-  if (fileName) {
-    fileNameDiv.innerHTML = '✓ ' + fileName;
-    uploadBox.style.borderColor = '#28a745';
-    uploadBox.style.backgroundColor = '#f0fff4';
+    const fileName = input.files[0]?.name;
+    const fileNameDiv = document.getElementById('fileName');
+    const uploadBox = document.getElementById('uploadBox');
+    if (fileName) {
+      fileNameDiv.innerHTML = '✓ ' + fileName;
+      uploadBox.style.borderColor = '#28a745';
+      uploadBox.style.backgroundColor = '#f0fff4';
+    }
   }
-}
-</script>
 
+  document.getElementById('predict-form').addEventListener('submit', function(e) {
+    var isAuthenticated = document.getElementById('is-authenticated').value === '1';
+    if (!isAuthenticated) {
+      e.preventDefault();
+      window.location.href = '/auth/register';
+    }
+  });
+</script>
 </html>

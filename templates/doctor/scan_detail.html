@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scan Detail | Retinex</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f4ff; min-height: 100vh; }
+
+        .navbar {
+            background: linear-gradient(135deg, #0d3d6b, #1565c0);
+            padding: 16px 32px; display: flex;
+            justify-content: space-between; align-items: center;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+        }
+        .navbar-brand { color: white; font-size: 1.5rem; font-weight: 700; }
+        .navbar-brand span { color: #90caf9; }
+        .navbar-nav { display: flex; gap: 8px; align-items: center; }
+        .navbar-nav a { color: rgba(255,255,255,0.85); text-decoration: none; font-size: 0.9rem; font-weight: 500; padding: 8px 16px; border-radius: 8px; transition: all 0.2s; }
+        .navbar-nav a:hover { background: rgba(255,255,255,0.15); color: white; }
+        .btn-logout { background: rgba(255,255,255,0.1) !important; border: 1px solid rgba(255,255,255,0.3) !important; }
+
+        .main { padding: 32px; max-width: 1100px; margin: 0 auto; }
+
+        .breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: #999; margin-bottom: 24px; }
+        .breadcrumb a { color: #1565c0; text-decoration: none; }
+        .breadcrumb a:hover { text-decoration: underline; }
+        .breadcrumb span { color: #ccc; }
+
+        .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+
+        .card { background: white; border-radius: 16px; padding: 28px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+        .card-title { font-size: 0.82rem; font-weight: 700; color: #1565c0; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 18px; padding-bottom: 12px; border-bottom: 2px solid #e3f2fd; }
+
+        .scan-image { width: 100%; border-radius: 12px; border: 2px solid #e3f2fd; display: block; }
+        .scan-meta { display: flex; justify-content: space-between; margin-top: 12px; font-size: 0.78rem; color: #aaa; }
+
+        .result-banner {
+            border-radius: 14px; padding: 20px 24px;
+            text-align: center; margin-bottom: 22px;
+        }
+        .result-banner.detected { background: linear-gradient(135deg, #ffebee, #ffcdd2); border: 2px solid #ef9a9a; }
+        .result-banner.clear    { background: linear-gradient(135deg, #e8f5e9, #c8e6c9); border: 2px solid #a5d6a7; }
+        .result-icon { font-size: 2rem; margin-bottom: 8px; }
+        .result-banner h2 { font-size: 1rem; font-weight: 700; }
+        .result-banner.detected h2 { color: #c62828; }
+        .result-banner.clear    h2 { color: #2e7d32; }
+        .result-banner p { font-size: 0.8rem; opacity: 0.75; margin-top: 4px; }
+
+        .confidence-section { margin-bottom: 22px; }
+        .confidence-header { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 6px; }
+        .confidence-label { color: #555; font-weight: 500; }
+        .confidence-val { font-weight: 700; color: #1565c0; }
+        .confidence-track { background: #f0f0f0; border-radius: 20px; height: 10px; overflow: hidden; }
+        .confidence-fill { height: 100%; border-radius: 20px; background: linear-gradient(90deg, #1565c0, #42a5f5); transition: width 1s ease; }
+        .confidence-fill.danger { background: linear-gradient(90deg, #c62828, #ef5350); }
+
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .info-item { background: #f8f9ff; border-radius: 10px; padding: 12px 14px; }
+        .info-item .label { font-size: 0.72rem; color: #999; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+        .info-item .value { font-size: 0.9rem; font-weight: 600; color: #1a237e; }
+
+        .actions { display: flex; gap: 10px; margin-top: 22px; }
+        .btn { padding: 10px 20px; border-radius: 10px; font-weight: 600; font-size: 0.88rem; text-decoration: none; text-align: center; transition: all 0.2s; }
+        .btn-primary { background: #1565c0; color: white; flex: 1; }
+        .btn-primary:hover { background: #0d47a1; }
+        .btn-outline { background: white; color: #1565c0; border: 2px solid #1565c0; flex: 1; }
+        .btn-outline:hover { background: #e3f2fd; }
+
+        .timeline-card { margin-top: 24px; }
+        .timeline { list-style: none; padding: 0; }
+        .timeline-item { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid #f0f4ff; }
+        .timeline-item:last-child { border-bottom: none; }
+        .timeline-dot {
+            width: 10px; height: 10px; border-radius: 50%;
+            margin-top: 5px; flex-shrink: 0;
+        }
+        .dot-danger { background: #c62828; }
+        .dot-success { background: #2e7d32; }
+        .timeline-date { font-size: 0.78rem; color: #999; margin-top: 2px; }
+        .timeline-result { font-size: 0.88rem; font-weight: 600; color: #333; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="navbar-brand">Retinex <span>MD</span></div>
+        <div class="navbar-nav">
+            <a href="{{ url_for('doctor.dashboard') }}">Dashboard</a>
+            <a href="{{ url_for('doctor.patients') }}">Patients</a>
+            <a href="{{ url_for('auth.logout') }}" class="btn-logout">Logout</a>
+        </div>
+    </nav>
+
+    <div class="main">
+
+        <div class="breadcrumb">
+            <a href="{{ url_for('doctor.dashboard') }}">Dashboard</a>
+            <span>/</span>
+            <a href="{{ url_for('doctor.patients') }}">Patients</a>
+            <span>/</span>
+            <span>{{ patient.full_name }}</span>
+            <span>/</span>
+            <span>Scan #{{ scan.id }}</span>
+        </div>
+
+        <div class="detail-grid">
+
+            <!-- LEFT: Image + History -->
+            <div>
+                <div class="card">
+                    <div class="card-title">Retinal Fundus Image</div>
+                    <img class="scan-image"
+                         src="{{ url_for('static', filename='uploads/' + scan.image_path) }}"
+                         alt="Retinal scan">
+                    <div class="scan-meta">
+                        <span>Scan ID: #{{ scan.id }}</span>
+                        <span>{{ scan.created_at.strftime('%d %B %Y at %H:%M') }}</span>
+                    </div>
+                </div>
+
+                {% if patient.scans|length > 1 %}
+                <div class="card timeline-card">
+                    <div class="card-title">Scan History</div>
+                    <ul class="timeline">
+                        {% for s in patient.scans|reverse %}
+                        <li class="timeline-item">
+                            <div class="timeline-dot {% if 'No' in s.prediction %}dot-success{% else %}dot-danger{% endif %}"></div>
+                            <div>
+                                <div class="timeline-result">
+                                    {% if 'No' in s.prediction %}Clear{% else %}DR Detected{% endif %}
+                                    — {{ "%.1f"|format(s.confidence) }}%
+                                    {% if s.id == scan.id %}<span style="color:#1565c0; font-size:0.75rem;">(current)</span>{% endif %}
+                                </div>
+                                <div class="timeline-date">{{ s.created_at.strftime('%d %b %Y, %H:%M') }}</div>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- RIGHT: Result + Patient Info -->
+            <div>
+                <div class="card" style="margin-bottom:20px;">
+                    <div class="card-title">Diagnosis Result</div>
+
+                    <div class="result-banner {% if 'No' in scan.prediction %}clear{% else %}detected{% endif %}">
+                        <div class="result-icon">{% if 'No' in scan.prediction %}✅{% else %}⚠️{% endif %}</div>
+                        <h2>{{ scan.prediction }}</h2>
+                        <p>AI-assisted CNN screening result</p>
+                    </div>
+
+                    <div class="confidence-section">
+                        <div class="confidence-header">
+                            <span class="confidence-label">Confidence Score</span>
+                            <span class="confidence-val">{{ "%.1f"|format(scan.confidence) }}%</span>
+                        </div>
+                        <div class="confidence-track">
+                            <div class="confidence-fill {% if 'No' not in scan.prediction %}danger{% endif %}"
+                                 style="width: {{ scan.confidence }}%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">Patient Information</div>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="label">Full Name</div>
+                            <div class="value">{{ patient.full_name }}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="label">Age</div>
+                            <div class="value">{{ patient.age or '—' }}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="label">Gender</div>
+                            <div class="value">{{ patient.gender or '—' }}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="label">Phone</div>
+                            <div class="value">{{ patient.phone or '—' }}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="label">Total Scans</div>
+                            <div class="value">{{ patient.scans|length }}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="label">Email</div>
+                            <div class="value" style="font-size:0.78rem;">{{ patient.user.email }}</div>
+                        </div>
+                    </div>
+
+                    <div class="actions">
+                        <a href="{{ url_for('doctor.patients') }}" class="btn btn-outline">← All Patients</a>
+                        <a href="{{ url_for('doctor.dashboard') }}" class="btn btn-primary">Dashboard</a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</body>
+</html>
