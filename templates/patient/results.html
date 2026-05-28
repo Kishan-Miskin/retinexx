@@ -12,33 +12,97 @@
             background: #f4f6f9; min-height: 100vh;
         }
 
+        /* ── NAVBAR ── */
         .navbar {
-            background: #0b5e3a; padding: 16px 32px;
-            display: flex; justify-content: space-between; align-items: center;
+            background: #0b5e3a;
+            padding: 16px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            position: relative;
+            z-index: 100;
         }
-        .navbar-brand { color: white; font-size: 1.5rem; font-weight: 700; }
-        .navbar-nav { display: flex; gap: 24px; align-items: center; }
-        .navbar-nav a { color: rgba(255,255,255,0.85); text-decoration: none; font-size: 0.95rem; font-weight: 500; }
+        .navbar-brand { color: white; font-size: 1.5rem; font-weight: 700; flex-shrink: 0; }
+        .navbar-nav {
+            display: flex;
+            gap: 24px;
+            align-items: center;
+        }
+        .navbar-nav a {
+            color: rgba(255,255,255,0.85);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            white-space: nowrap;
+        }
         .navbar-nav a:hover, .navbar-nav a.active { color: white; }
         .btn-logout {
-            background: rgba(255,255,255,0.15); color: white;
-            padding: 7px 16px; border-radius: 8px; text-decoration: none;
+            background: rgba(255,255,255,0.15);
+            color: white;
+            padding: 7px 16px;
+            border-radius: 8px;
+            text-decoration: none;
         }
 
-        .main { padding: 32px; max-width: 1100px; margin: 0 auto; }
+        /* ── HAMBURGER TOGGLE ── */
+        .navbar-toggler {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.12);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            padding: 8px;
+            flex-shrink: 0;
+        }
+        .navbar-toggler span {
+            display: block;
+            width: 22px;
+            height: 2px;
+            background: white;
+            border-radius: 2px;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            transform-origin: center;
+        }
+        /* Animate to X when open */
+        .navbar-toggler.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+        .navbar-toggler.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+        .navbar-toggler.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+        /* ── MAIN CONTENT ── */
+        .main {
+            padding: 32px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
 
         .page-header {
-            display: flex; justify-content: space-between;
-            align-items: center; margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            gap: 12px;
         }
         .page-title { font-size: 1.4rem; font-weight: 700; color: #333; }
         .btn-new-scan {
-            background: #0b5e3a; color: white;
-            padding: 10px 20px; border-radius: 8px;
-            text-decoration: none; font-weight: 600; font-size: 0.9rem;
+            background: #0b5e3a;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
 
+        /* ── RESULTS GRID ── */
         .results-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -46,62 +110,178 @@
         }
 
         .result-card {
-            background: white; border-radius: 14px;
-            overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            background: white;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
             transition: transform 0.2s;
         }
         .result-card:hover { transform: translateY(-3px); }
 
         .result-card img {
-            width: 100%; height: 180px; object-fit: cover;
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
         }
 
         .result-body { padding: 18px; }
-
         .result-date { font-size: 0.8rem; color: #999; margin-bottom: 10px; }
 
         .badge {
-            display: inline-block; padding: 5px 14px;
-            border-radius: 20px; font-size: 0.82rem; font-weight: 600;
+            display: inline-block;
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: 0.82rem;
+            font-weight: 600;
             margin-bottom: 10px;
         }
         .badge-danger  { background: #ffebee; color: #c62828; }
         .badge-success { background: #e8f5e9; color: #2e7d32; }
 
         .confidence-bar-wrap {
-            background: #f0f0f0; border-radius: 20px;
-            height: 8px; overflow: hidden; margin-top: 8px;
+            background: #f0f0f0;
+            border-radius: 20px;
+            height: 8px;
+            overflow: hidden;
+            margin-top: 8px;
         }
         .confidence-bar {
-            height: 100%; border-radius: 20px;
+            height: 100%;
+            border-radius: 20px;
             background: linear-gradient(90deg, #0b5e3a, #1a8a5a);
         }
         .confidence-label {
-            font-size: 0.8rem; color: #666;
+            font-size: 0.8rem;
+            color: #666;
             margin-top: 6px;
         }
 
         .empty-state {
-            text-align: center; padding: 64px 20px; color: #999;
+            text-align: center;
+            padding: 64px 20px;
+            color: #999;
             grid-column: 1/-1;
         }
         .empty-state p { margin-bottom: 16px; font-size: 1rem; }
         .empty-state a {
-            background: #0b5e3a; color: white;
-            padding: 10px 24px; border-radius: 8px;
-            text-decoration: none; font-weight: 600;
+            background: #0b5e3a;
+            color: white;
+            padding: 10px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
         }
 
-        .alert { padding: 10px 14px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9rem; }
+        .alert {
+            padding: 10px 14px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
         .alert-success { background: #e8f5e9; color: #2e7d32; border-left: 4px solid #2e7d32; }
         .alert-danger  { background: #ffebee; color: #c62828; border-left: 4px solid #c62828; }
+
+        /* ════════════════════════════
+           RESPONSIVE BREAKPOINTS
+        ════════════════════════════ */
+
+        /* Ultra-wide: cap content width, scale up gracefully */
+        @media (min-width: 1400px) {
+            .main { max-width: 1300px; }
+            .results-grid { grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); }
+        }
+
+        /* Tablet landscape / small laptop */
+        @media (max-width: 1024px) {
+            .navbar { padding: 14px 24px; }
+            .main { padding: 24px; }
+            .results-grid { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+        }
+
+        /* Tablet portrait */
+        @media (max-width: 768px) {
+            /* Show hamburger, hide regular nav */
+            .navbar-toggler { display: flex; }
+            .navbar-nav {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: #0b5e3a;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0;
+                padding: 8px 0 12px;
+                box-shadow: 0 6px 16px rgba(0,0,0,0.18);
+                z-index: 99;
+            }
+            .navbar-nav.open { display: flex; }
+            .navbar-nav a {
+                width: 100%;
+                padding: 12px 28px;
+                font-size: 1rem;
+                border-bottom: 1px solid rgba(255,255,255,0.08);
+            }
+            .navbar-nav a:last-child { border-bottom: none; }
+            .btn-logout {
+                background: transparent;
+                border-radius: 0;
+                padding: 12px 28px;
+                color: rgba(255,255,255,0.85);
+            }
+
+            .main { padding: 20px 16px; }
+            .page-title { font-size: 1.2rem; }
+            .results-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
+        }
+
+        /* Mobile */
+        @media (max-width: 480px) {
+            .navbar { padding: 12px 16px; }
+            .navbar-brand { font-size: 1.25rem; }
+
+            .main { padding: 16px 12px; }
+
+            .page-header {
+                flex-direction: row;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            .page-title { font-size: 1.1rem; }
+            .btn-new-scan { padding: 8px 14px; font-size: 0.85rem; }
+
+            .results-grid {
+                grid-template-columns: 1fr;
+                gap: 14px;
+            }
+
+            .result-card img { height: 160px; }
+            .result-body { padding: 14px; }
+
+            .empty-state { padding: 48px 16px; }
+        }
+
+        /* Very small phones */
+        @media (max-width: 360px) {
+            .navbar-brand { font-size: 1.1rem; }
+            .main { padding: 12px 10px; }
+        }
     </style>
 </head>
 <body>
 
     <nav class="navbar">
         <div class="navbar-brand">Retinex</div>
-        <div class="navbar-nav">
+
+        <!-- Hamburger toggle (mobile only) -->
+        <button class="navbar-toggler" id="navToggler" aria-label="Toggle navigation" aria-expanded="false">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
+        <div class="navbar-nav" id="navMenu">
             <a href="{{ url_for('patient.dashboard') }}">Dashboard</a>
             <a href="{{ url_for('patient.upload') }}">New Scan</a>
             <a href="{{ url_for('patient.results') }}" class="active">My Results</a>
@@ -129,7 +309,7 @@
                 {% for scan in scans %}
                 <div class="result-card">
                     <img src="{{ url_for('static', filename='uploads/' + scan.image_path) }}"
-                         alt="Retinal scan" onerror="this.src='{{ url_for('static', filename='images/placeholder.png') }}'; ">
+                         alt="Retinal scan" onerror="this.src='{{ url_for('static', filename='images/placeholder.png') }}';">
                     <div class="result-body">
                         <div class="result-date">{{ scan.created_at.strftime('%d %B %Y at %H:%M') }}</div>
                         {% if 'No' in scan.prediction %}
@@ -152,5 +332,35 @@
             {% endif %}
         </div>
     </div>
+
+    <script>
+        const toggler = document.getElementById('navToggler');
+        const menu    = document.getElementById('navMenu');
+
+        toggler.addEventListener('click', () => {
+            const isOpen = menu.classList.toggle('open');
+            toggler.classList.toggle('open', isOpen);
+            toggler.setAttribute('aria-expanded', isOpen);
+        });
+
+        // Close menu when a nav link is tapped on mobile
+        menu.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                menu.classList.remove('open');
+                toggler.classList.remove('open');
+                toggler.setAttribute('aria-expanded', 'false');
+            });
+        });
+
+        // Close menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!toggler.contains(e.target) && !menu.contains(e.target)) {
+                menu.classList.remove('open');
+                toggler.classList.remove('open');
+                toggler.setAttribute('aria-expanded', 'false');
+            }
+        });
+    </script>
+
 </body>
 </html>

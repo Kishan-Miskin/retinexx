@@ -9,43 +9,122 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f4f6f9; min-height: 100vh;
+            background: #f4f6f9;
+            min-height: 100vh;
         }
 
+        /* ── NAVBAR ── */
         .navbar {
-            background: #0b5e3a; padding: 16px 32px;
-            display: flex; justify-content: space-between; align-items: center;
+            background: #0b5e3a;
+            padding: 16px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            position: relative;
         }
-        .navbar-brand { color: white; font-size: 1.5rem; font-weight: 700; }
-        .navbar-nav { display: flex; gap: 24px; align-items: center; }
-        .navbar-nav a { color: rgba(255,255,255,0.85); text-decoration: none; font-size: 0.95rem; font-weight: 500; }
-        .navbar-nav a:hover, .navbar-nav a.active { color: white; }
+
+        .navbar-brand {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .navbar-nav {
+            display: flex;
+            gap: 24px;
+            align-items: center;
+        }
+
+        .navbar-nav a {
+            color: rgba(255,255,255,0.85);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .navbar-nav a:hover,
+        .navbar-nav a.active { color: white; }
+
         .btn-logout {
-            background: rgba(255,255,255,0.15); color: white;
-            padding: 7px 16px; border-radius: 8px; text-decoration: none;
+            background: rgba(255,255,255,0.15);
+            color: white;
+            padding: 7px 16px;
+            border-radius: 8px;
+            text-decoration: none;
         }
         .btn-logout:hover { background: rgba(255,255,255,0.25); }
 
-        .main { padding: 40px 32px; max-width: 680px; margin: 0 auto; }
-
-        .page-title { font-size: 1.4rem; font-weight: 700; color: #333; margin-bottom: 24px; }
-
-        .upload-card {
-            background: white; border-radius: 16px;
-            padding: 40px; box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        /* ── HAMBURGER TOGGLE ── */
+        .nav-toggle {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            gap: 5px;
+            cursor: pointer;
+            padding: 4px;
+            background: none;
+            border: none;
+            outline: none;
+            z-index: 101;
         }
 
+        .nav-toggle span {
+            display: block;
+            width: 24px;
+            height: 2.5px;
+            background: white;
+            border-radius: 2px;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        /* Animate hamburger → X */
+        .nav-toggle.open span:nth-child(1) { transform: translateY(7.5px) rotate(45deg); }
+        .nav-toggle.open span:nth-child(2) { opacity: 0; }
+        .nav-toggle.open span:nth-child(3) { transform: translateY(-7.5px) rotate(-45deg); }
+
+        /* ── MAIN ── */
+        .main {
+            padding: 40px 32px;
+            max-width: 680px;
+            margin: 0 auto;
+        }
+
+        .page-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 24px;
+        }
+
+        /* ── UPLOAD CARD ── */
+        .upload-card {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+
+        /* ── DROP ZONE ── */
         .drop-zone {
             border: 2.5px dashed #c8e6c9;
-            border-radius: 12px; padding: 48px 20px;
-            text-align: center; cursor: pointer;
-            transition: all 0.2s; margin-bottom: 24px;
+            border-radius: 12px;
+            padding: 48px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 24px;
             background: #f9fffe;
         }
-        .drop-zone:hover, .drop-zone.dragover {
-            border-color: #0b5e3a; background: #f0f8f5;
+
+        .drop-zone:hover,
+        .drop-zone.dragover {
+            border-color: #0b5e3a;
+            background: #f0f8f5;
         }
+
         .drop-zone .icon { font-size: 3rem; margin-bottom: 12px; }
         .drop-zone p { color: #555; font-size: 1rem; }
         .drop-zone span { color: #0b5e3a; font-weight: 600; cursor: pointer; }
@@ -53,36 +132,175 @@
 
         #file-input { display: none; }
 
-        #preview-container { text-align: center; margin-bottom: 20px; display: none; }
-        #preview-container img {
-            max-width: 100%; max-height: 260px;
-            border-radius: 10px; border: 2px solid #e0e0e0;
+        #preview-container {
+            text-align: center;
+            margin-bottom: 20px;
+            display: none;
         }
+
+        #preview-container img {
+            max-width: 100%;
+            max-height: 260px;
+            border-radius: 10px;
+            border: 2px solid #e0e0e0;
+        }
+
         #file-name { font-size: 0.85rem; color: #666; margin-top: 8px; }
 
+        /* ── BUTTONS ── */
         .btn-primary {
-            width: 100%; padding: 13px;
-            background: #0b5e3a; color: white;
-            border: none; border-radius: 10px;
-            font-size: 1rem; font-weight: 600;
-            cursor: pointer; transition: background 0.2s;
+            width: 100%;
+            padding: 13px;
+            background: #0b5e3a;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
         }
+
         .btn-primary:hover { background: #094d30; }
         .btn-primary:disabled { background: #aaa; cursor: not-allowed; }
 
-        .alert { padding: 10px 14px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9rem; }
+        /* ── ALERTS ── */
+        .alert {
+            padding: 10px 14px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
         .alert-warning { background: #fff8e1; color: #f57f17; border-left: 4px solid #f57f17; }
         .alert-success { background: #e8f5e9; color: #2e7d32; border-left: 4px solid #2e7d32; }
         .alert-danger  { background: #ffebee; color: #c62828; border-left: 4px solid #c62828; }
 
-        .loading { display: none; text-align: center; padding: 16px; color: #0b5e3a; font-weight: 600; }
+        /* ── LOADING ── */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 16px;
+            color: #0b5e3a;
+            font-weight: 600;
+        }
+
+        /* ════════════════════════════
+           RESPONSIVE — TABLET ≤ 768px
+           ════════════════════════════ */
+        @media (max-width: 768px) {
+
+            /* Show hamburger, hide nav links by default */
+            .nav-toggle { display: flex; }
+
+            .navbar-nav {
+                display: none;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: #0b5e3a;
+                padding: 8px 0 16px;
+                box-shadow: 0 6px 16px rgba(0,0,0,0.18);
+                z-index: 100;
+            }
+
+            /* Open state */
+            .navbar-nav.open { display: flex; }
+
+            .navbar-nav a {
+                width: 100%;
+                padding: 12px 32px;
+                font-size: 1rem;
+                border-bottom: 1px solid rgba(255,255,255,0.08);
+            }
+
+            .navbar-nav a:last-child { border-bottom: none; }
+
+            .btn-logout {
+                margin: 8px 32px 0;
+                width: calc(100% - 64px);
+                text-align: center;
+                padding: 10px 16px;
+                border-radius: 8px;
+            }
+
+            /* Main content */
+            .main {
+                padding: 28px 16px;
+            }
+
+            .upload-card {
+                padding: 28px 20px;
+                border-radius: 12px;
+            }
+
+            .drop-zone {
+                padding: 36px 16px;
+            }
+
+            .page-title { font-size: 1.25rem; }
+        }
+
+        /* ════════════════════════════
+           RESPONSIVE — MOBILE ≤ 480px
+           ════════════════════════════ */
+        @media (max-width: 480px) {
+            .navbar { padding: 14px 20px; }
+            .navbar-brand { font-size: 1.3rem; }
+
+            .navbar-nav a { padding: 11px 20px; }
+
+            .btn-logout {
+                margin: 8px 20px 0;
+                width: calc(100% - 40px);
+            }
+
+            .main { padding: 20px 12px; }
+
+            .upload-card { padding: 20px 14px; }
+
+            .drop-zone {
+                padding: 28px 12px;
+            }
+
+            .drop-zone .icon { font-size: 2.4rem; }
+            .drop-zone p { font-size: 0.92rem; }
+
+            .btn-primary {
+                font-size: 0.95rem;
+                padding: 12px;
+            }
+
+            .page-title { font-size: 1.1rem; }
+
+            #preview-container img { max-height: 200px; }
+        }
+
+        /* ═══════════════════════════════
+           RESPONSIVE — ULTRA-WIDE ≥ 1400px
+           ═══════════════════════════════ */
+        @media (min-width: 1400px) {
+            .main { max-width: 760px; }
+            .navbar { padding: 18px 48px; }
+        }
     </style>
 </head>
 <body>
 
     <nav class="navbar">
         <div class="navbar-brand">Retinex</div>
-        <div class="navbar-nav">
+
+        <!-- Hamburger toggle (visible on mobile/tablet) -->
+        <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
+        <div class="navbar-nav" id="navbar-nav">
             <a href="{{ url_for('patient.dashboard') }}">Dashboard</a>
             <a href="{{ url_for('patient.upload') }}" class="active">New Scan</a>
             <a href="{{ url_for('patient.results') }}">My Results</a>
@@ -108,7 +326,7 @@
                 <div class="drop-zone" id="drop-zone"
                      onclick="document.getElementById('file-input').click()">
                     <div class="icon">🔬</div>
-                    <p>Drag & drop your retinal image here</p>
+                    <p>Drag &amp; drop your retinal image here</p>
                     <p>or <span>browse to upload</span></p>
                     <p class="hint">Supported formats: PNG, JPG, JPEG</p>
                 </div>
@@ -126,48 +344,79 @@
                 </div>
 
                 <button type="submit" class="btn-primary" id="submit-btn" disabled>
-    Analyse Scan
-</button>
+                    Analyse Scan
+                </button>
             </form>
         </div>
     </div>
 
     <script>
+        /* ── Image preview ── */
         function previewImage(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            document.getElementById('preview-img').src = e.target.result;
-            document.getElementById('file-name').textContent = file.name;
-            document.getElementById('preview-container').style.display = 'block';
-            document.getElementById('drop-zone').style.display = 'none';
-            document.getElementById('submit-btn').disabled = false;
-        };
-        reader.readAsDataURL(file);
-    }
-
-    document.getElementById('upload-form').addEventListener('submit', function() {
-        document.getElementById('loading').style.display = 'block';
-        document.getElementById('submit-btn').disabled = true;
-        document.getElementById('submit-btn').textContent = 'Analysing...';
-    });
-
-    const dropZone = document.getElementById('drop-zone');
-    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
-    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
-    dropZone.addEventListener('drop', (e) => {
-        e.preventDefault();
-        dropZone.classList.remove('dragover');
-        const file = e.dataTransfer.files[0];
-        if (file) {
-            const input = document.getElementById('file-input');
-            const dt = new DataTransfer();
-            dt.items.add(file);
-            input.files = dt.files;
-            previewImage({ target: input });
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('preview-img').src = e.target.result;
+                document.getElementById('file-name').textContent = file.name;
+                document.getElementById('preview-container').style.display = 'block';
+                document.getElementById('drop-zone').style.display = 'none';
+                document.getElementById('submit-btn').disabled = false;
+            };
+            reader.readAsDataURL(file);
         }
-    });
+
+        /* ── Form submit state ── */
+        document.getElementById('upload-form').addEventListener('submit', function() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('submit-btn').disabled = true;
+            document.getElementById('submit-btn').textContent = 'Analysing...';
+        });
+
+        /* ── Drag & drop ── */
+        const dropZone = document.getElementById('drop-zone');
+        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file) {
+                const input = document.getElementById('file-input');
+                const dt = new DataTransfer();
+                dt.items.add(file);
+                input.files = dt.files;
+                previewImage({ target: input });
+            }
+        });
+
+        /* ── Hamburger toggle ── */
+        const navToggle = document.getElementById('nav-toggle');
+        const navMenu   = document.getElementById('navbar-nav');
+
+        navToggle.addEventListener('click', function() {
+            const isOpen = navMenu.classList.toggle('open');
+            navToggle.classList.toggle('open', isOpen);
+            navToggle.setAttribute('aria-expanded', isOpen);
+        });
+
+        /* Close menu when a nav link is tapped (mobile UX) */
+        navMenu.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                navMenu.classList.remove('open');
+                navToggle.classList.remove('open');
+                navToggle.setAttribute('aria-expanded', 'false');
+            });
+        });
+
+        /* Close menu on outside click */
+        document.addEventListener('click', function(e) {
+            if (!navToggle.contains(e.target) && !navMenu.contains(e.target)) {
+                navMenu.classList.remove('open');
+                navToggle.classList.remove('open');
+                navToggle.setAttribute('aria-expanded', 'false');
+            }
+        });
     </script>
 </body>
 </html>

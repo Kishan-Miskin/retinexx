@@ -21,6 +21,9 @@
             justify-content: space-between;
             align-items: center;
             box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
         .navbar-brand { color: white; font-size: 1.5rem; font-weight: 700; letter-spacing: 1px; }
         .navbar-nav { display: flex; gap: 24px; align-items: center; }
@@ -38,6 +41,51 @@
         }
         .btn-logout:hover { background: rgba(255,255,255,0.25); }
 
+        /* HAMBURGER */
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+            padding: 4px;
+            background: none;
+            border: none;
+        }
+        .hamburger span {
+            display: block;
+            width: 24px;
+            height: 2px;
+            background: white;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+
+        /* MOBILE NAV DRAWER */
+        .mobile-nav {
+            display: none;
+            flex-direction: column;
+            background: #0a4f31;
+            padding: 16px 24px 20px;
+            gap: 4px;
+        }
+        .mobile-nav a {
+            color: rgba(255,255,255,0.88);
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: 500;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            display: block;
+            transition: color 0.2s;
+        }
+        .mobile-nav a:last-child { border-bottom: none; }
+        .mobile-nav a:hover, .mobile-nav a.active { color: white; }
+        .mobile-nav .btn-logout {
+            margin-top: 8px;
+            display: inline-block;
+            width: fit-content;
+        }
+
         /* MAIN */
         .main { padding: 32px; max-width: 1100px; margin: 0 auto; }
 
@@ -46,6 +94,7 @@
             color: white; border-radius: 16px;
             padding: 28px 32px; margin-bottom: 28px;
             display: flex; justify-content: space-between; align-items: center;
+            gap: 20px;
         }
         .welcome-banner h2 { font-size: 1.6rem; font-weight: 700; }
         .welcome-banner p { opacity: 0.85; margin-top: 6px; font-size: 0.95rem; }
@@ -55,6 +104,7 @@
             text-decoration: none; font-weight: 700;
             font-size: 0.95rem; white-space: nowrap;
             transition: transform 0.2s;
+            flex-shrink: 0;
         }
         .btn-upload:hover { transform: translateY(-2px); }
 
@@ -83,12 +133,20 @@
             box-shadow: 0 2px 12px rgba(0,0,0,0.06);
             overflow: hidden;
         }
-        table { width: 100%; border-collapse: collapse; }
+
+        /* TABLE SCROLL WRAPPER for mobile */
+        .table-scroll {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        table { width: 100%; border-collapse: collapse; min-width: 400px; }
         th {
             background: #f8f9fa; padding: 14px 18px;
             text-align: left; font-size: 0.82rem;
             font-weight: 600; color: #555;
             text-transform: uppercase; letter-spacing: 0.5px;
+            white-space: nowrap;
         }
         td { padding: 14px 18px; font-size: 0.92rem; color: #333; border-top: 1px solid #f0f0f0; }
         tr:hover td { background: #f9fffe; }
@@ -96,6 +154,7 @@
         .badge {
             padding: 4px 12px; border-radius: 20px;
             font-size: 0.8rem; font-weight: 600;
+            white-space: nowrap;
         }
         .badge-danger  { background: #ffebee; color: #c62828; }
         .badge-success { background: #e8f5e9; color: #2e7d32; }
@@ -114,6 +173,68 @@
         .alert-success { background: #e8f5e9; color: #2e7d32; border-left: 4px solid #2e7d32; }
         .alert-danger  { background: #ffebee; color: #c62828; border-left: 4px solid #c62828; }
         .alert-warning { background: #fff8e1; color: #f57f17; border-left: 4px solid #f57f17; }
+
+        /* ── RESPONSIVE ───────────────────────────────────── */
+
+        /* Tablet — 768px */
+        @media (max-width: 768px) {
+            .navbar { padding: 14px 20px; }
+            .navbar-nav { display: none; }
+            .hamburger { display: flex; }
+
+            .main { padding: 20px 16px; }
+
+            .welcome-banner {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 22px 20px;
+                gap: 16px;
+            }
+            .welcome-banner h2 { font-size: 1.3rem; }
+            .btn-upload { width: 100%; text-align: center; padding: 12px 20px; }
+
+            .stats-grid { grid-template-columns: repeat(3, 1fr); gap: 12px; }
+            .stat-card { padding: 16px 10px; }
+            .stat-number { font-size: 1.7rem; }
+            .stat-label { font-size: 0.8rem; }
+
+            th, td { padding: 12px 14px; }
+        }
+
+        /* Small mobile — 480px */
+        @media (max-width: 480px) {
+            .navbar { padding: 12px 16px; }
+            .navbar-brand { font-size: 1.2rem; }
+
+            .main { padding: 16px 12px; }
+
+            .welcome-banner { padding: 18px 16px; border-radius: 12px; }
+            .welcome-banner h2 { font-size: 1.15rem; }
+            .welcome-banner p { font-size: 0.88rem; }
+
+            .stats-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+            .stat-card { padding: 14px 8px; border-radius: 10px; }
+            .stat-number { font-size: 1.5rem; }
+            .stat-label { font-size: 0.72rem; }
+
+            .section-title { font-size: 1rem; }
+            .table-card { border-radius: 10px; }
+
+            th { font-size: 0.74rem; padding: 10px 12px; }
+            td { font-size: 0.86rem; padding: 10px 12px; }
+            .badge { font-size: 0.72rem; padding: 3px 9px; }
+
+            .empty-state { padding: 36px 16px; }
+            .alert { font-size: 0.85rem; }
+        }
+
+        /* Very small — 360px */
+        @media (max-width: 360px) {
+            .stats-grid { gap: 6px; }
+            .stat-card { padding: 12px 6px; }
+            .stat-number { font-size: 1.3rem; }
+            .stat-label { font-size: 0.68rem; }
+        }
     </style>
 </head>
 <body>
@@ -126,7 +247,17 @@
             <a href="{{ url_for('patient.results') }}">My Results</a>
             <a href="{{ url_for('auth.logout') }}" class="btn-logout">Logout</a>
         </div>
+        <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+            <span></span><span></span><span></span>
+        </button>
     </nav>
+
+    <div class="mobile-nav" id="mobileNav">
+        <a href="{{ url_for('patient.dashboard') }}" class="active">Dashboard</a>
+        <a href="{{ url_for('patient.upload') }}">New Scan</a>
+        <a href="{{ url_for('patient.results') }}">My Results</a>
+        <a href="{{ url_for('auth.logout') }}" class="btn-logout">Logout</a>
+    </div>
 
     <div class="main">
 
@@ -167,6 +298,7 @@
 
         <div class="section-title">Recent Scans</div>
         <div class="table-card">
+            <div class="table-scroll">
             {% if scans %}
             <table>
                 <thead>
@@ -200,8 +332,19 @@
                 <a href="{{ url_for('patient.upload') }}">Upload Now</a>
             </div>
             {% endif %}
+            </div>
         </div>
 
     </div>
+
+    <script>
+        const hamburger = document.getElementById('hamburger');
+        const mobileNav = document.getElementById('mobileNav');
+        hamburger.addEventListener('click', function() {
+            const isOpen = mobileNav.style.display === 'flex';
+            mobileNav.style.display = isOpen ? 'none' : 'flex';
+        });
+    </script>
+
 </body>
 </html>

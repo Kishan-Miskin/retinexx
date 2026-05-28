@@ -97,7 +97,7 @@
                         <span class="prob-val">{{ "%.1f"|format(probabilities[0] * 100) }}%</span>
                     </div>
                     <div class="prob-track">
-                        <div class="prob-fill" style="width: {{ probabilities[0] * 100 }}%"></div>
+                        <div class="prob-fill" style="--w: {{ probabilities[0] * 100 }}%; width: var(--w)"></div>
                     </div>
                 </div>
 
@@ -109,7 +109,7 @@
                         <span class="prob-val">{{ "%.1f"|format(probabilities[1] * 100) }}%</span>
                     </div>
                     <div class="prob-track">
-                        <div class="prob-fill" style="width: {{ probabilities[1] * 100 }}%"></div>
+                        <div class="prob-fill" style="--w: {{ probabilities[1] * 100 }}%; width: var(--w)"></div>
                     </div>
                 </div>
 
